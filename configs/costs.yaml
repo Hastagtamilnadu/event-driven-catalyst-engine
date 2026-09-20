@@ -1,0 +1,18 @@
+version: "1.0"
+market: "NSE_EQ"
+settlement: "T+1"
+
+statutory_costs:
+  stt_delivery_buy_pct: 0.10      # Securities Transaction Tax (Delivery Buy)
+  stt_delivery_sell_pct: 0.10     # Securities Transaction Tax (Delivery Sell)
+  exchange_turnover_pct: 0.00325  # NSE Transaction Charges
+  sebi_turnover_pct: 0.00010      # SEBI Turnover Fee
+  stamp_duty_buy_pct: 0.015       # Stamp Duty (Buy Only)
+  stamp_duty_sell_pct: 0.0        # Stamp Duty (Sell)
+  gst_pct: 18.0                   # GST on (Brokerage + Exchange + SEBI Charges)
+  brokerage_pct: 0.0              # Zero-brokerage institutional/discount model
+
+slippage_model:
+  baseline_half_spread_pct: 0.05  # 5 bps half spread
+  impact_coefficient: 0.01        # Participation impact coefficient
+  max_fill_participation_pct: 5.0 # Max 5% of 20-day ADV per day

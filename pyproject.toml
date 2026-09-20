@@ -1,0 +1,46 @@
+[project]
+name = "qual-event-engine"
+version = "0.1.0"
+description = "Auditable qualitative event research and paper-trading engine"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "fastapi",
+  "httpx",
+  "pandas",
+  "pyarrow",
+  "pydantic",
+  "pymupdf",
+  "pyyaml",
+  "streamlit",
+  "tenacity",
+  "uvicorn",
+]
+
+[project.optional-dependencies]
+dev = ["mypy", "pytest", "pytest-cov", "ruff"]
+
+[project.scripts]
+qual-engine = "qual_event_engine.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+extend-ignore = ["B008"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+
+[[tool.mypy.overrides]]
+module = ["fitz", "pandas", "yaml"]
+ignore_missing_imports = true

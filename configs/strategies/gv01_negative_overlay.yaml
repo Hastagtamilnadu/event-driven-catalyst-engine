@@ -1,0 +1,38 @@
+strategy_id: GV-01
+version: "6.0"
+mode: ACTIVE_RISK_OVERLAY
+operational_status: PAUSED_ALPHA_ENTRY_ACTIVE_PROTECTIVE_OVERLAY
+pause_reason: "Protective risk overlay only (maximum_position_nav_pct: 0.0%). Excluded from alpha entry. Failed Section 19.3 general alpha threshold: Profit Factor (1.12 < 1.35) and Top-2% Outlier Removal"
+allowed_sources:
+  - surveillance
+  - exchange
+allowed_event_types:
+  - NEGATIVE_GOVERNANCE
+  - REGULATORY_ACTION
+  - PROMOTER_INVESTIGATION
+  - ASM_GSM_INCLUSION
+required_firmness_level: 3
+required_entity_confidence: 0.90
+required_evidence_fields:
+  - regulatory_body
+  - notice_type
+minimum_source_lead_minutes: 0
+entry_session: IMMEDIATE
+entry_window_minutes: 0
+maximum_gap_pct: 0.0
+maximum_participation_pct: 0.0
+maximum_position_nav_pct: 0.0
+maximum_sector_nav_pct: 0.0
+maximum_cluster_nav_pct: 0.0
+initial_stop_policy: IMMEDIATE_EXIT
+profit_policy: NONE
+time_stop_sessions: 0
+negative_blacklist_sessions: 20
+benchmark_id: NONE
+cost_model_id: STATUTORY_EQUITY_DELIVERY_V1
+model_prompt_version: v1
+review_required: false
+effective_from: "2026-09-01T00:00:00Z"
+effective_to: "2027-09-01T00:00:00Z"
+owner: Quantitative Risk Management
+change_reason: Active risk overlay and blacklist enforcement

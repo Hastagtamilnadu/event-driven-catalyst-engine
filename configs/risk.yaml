@@ -1,0 +1,5 @@
+paper_nav_inr: 1000000
+maximum_sector_nav_pct: 20.0
+daily_loss_freeze_pct: 3.0
+drawdown_freeze_pct: 12.0
+negative_blacklist_sessions: 20

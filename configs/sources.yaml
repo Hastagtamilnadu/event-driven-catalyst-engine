@@ -1,0 +1,100 @@
+sources:
+  exchange:
+    enabled: true
+    mode: PAPER_SIGNAL
+    input_contract: manifest.jsonl
+    base_url: https://www.nseindia.com/companies-listing/corporate-filings-announcements
+    terms_url: https://www.nseindia.com/terms-of-use
+    cursor_strategy: timestamp
+    health_bounds:
+      min_daily_records: 5
+      max_daily_records: 5000
+      max_failure_rate: 0.02
+  ratings:
+    enabled: true
+    mode: PAPER_SIGNAL
+    input_contract: manifest.jsonl
+    base_url: https://www.crisil.com/en/home/our-businesses/ratings/rating-actions.html
+    terms_url: https://www.crisil.com/en/home/terms-and-conditions.html
+    cursor_strategy: timestamp
+    health_bounds:
+      min_daily_records: 1
+      max_daily_records: 1000
+      max_failure_rate: 0.01
+  tenders:
+    enabled: true
+    mode: PAPER_SIGNAL
+    input_contract: manifest.jsonl
+    base_url: https://gem.gov.in/contracts
+    terms_url: https://gem.gov.in/terms-and-conditions
+    cursor_strategy: timestamp
+    health_bounds:
+      min_daily_records: 1
+      max_daily_records: 2000
+      max_failure_rate: 0.05
+  usfda:
+    enabled: true
+    mode: PAPER_SIGNAL
+    input_contract: manifest.jsonl
+    base_url: https://www.fda.gov/drugs/drug-approvals-and-databases
+    terms_url: https://www.fda.gov/about-fda/about-website/website-disclaimer
+    cursor_strategy: sequence
+    health_bounds:
+      min_daily_records: 0
+      max_daily_records: 100
+      max_failure_rate: 0.01
+  parivesh:
+    enabled: true
+    mode: PAPER_SIGNAL
+    input_contract: manifest.jsonl
+    base_url: https://parivesh.nic.in/
+    terms_url: https://parivesh.nic.in/terms.html
+    cursor_strategy: timestamp
+    health_bounds:
+      min_daily_records: 0
+      max_daily_records: 500
+      max_failure_rate: 0.05
+  transcripts:
+    enabled: true
+    mode: CONTEXT_ONLY
+    input_contract: manifest.jsonl
+    base_url: https://www.nseindia.com/companies-listing/corporate-filings-transcripts
+    terms_url: https://www.nseindia.com/terms-of-use
+    cursor_strategy: timestamp
+    health_bounds:
+      min_daily_records: 0
+      max_daily_records: 500
+      max_failure_rate: 0.05
+  ownership:
+    enabled: true
+    mode: CONTEXT_ONLY
+    input_contract: manifest.jsonl
+    base_url: https://www.nseindia.com/companies-listing/corporate-filings-shareholding-pattern
+    terms_url: https://www.nseindia.com/terms-of-use
+    cursor_strategy: timestamp
+    health_bounds:
+      min_daily_records: 0
+      max_daily_records: 500
+      max_failure_rate: 0.05
+  surveillance:
+    enabled: true
+    mode: ACTIVE_RISK_OVERLAY
+    input_contract: manifest.jsonl
+    base_url: https://www.nseindia.com/reports/surveillance
+    terms_url: https://www.nseindia.com/terms-of-use
+    cursor_strategy: timestamp
+    health_bounds:
+      min_daily_records: 1
+      max_daily_records: 500
+      max_failure_rate: 0.01
+  calendar:
+    enabled: true
+    mode: PAPER_SIGNAL
+    input_contract: manifest.jsonl
+    base_url: https://www.nseindia.com/companies-listing/corporate-filings-board-meetings
+    terms_url: https://www.nseindia.com/terms-of-use
+    cursor_strategy: timestamp
+    health_bounds:
+      min_daily_records: 1
+      max_daily_records: 1000
+      max_failure_rate: 0.02

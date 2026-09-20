@@ -1,0 +1,35 @@
+strategy_id: CR-01
+version: "6.0"
+mode: PAUSED
+pause_reason: "Failed Section 19.3 Strategy Acceptance Contract: Net Expectancy (-5,792.46 INR < 0), Profit Factor (0.77 < 1.35), and Top-2% Outlier Removal"
+allowed_sources:
+  - ratings
+  - exchange
+allowed_event_types:
+  - CREDIT_UPGRADE
+required_firmness_level: 4
+required_entity_confidence: 0.95
+required_evidence_fields:
+  - previous_rating
+  - new_rating
+  - agency
+minimum_source_lead_minutes: 0
+entry_session: PRE_OPEN
+entry_window_minutes: 15
+maximum_gap_pct: 3.0
+maximum_participation_pct: 1.0
+maximum_position_nav_pct: 2.0
+maximum_sector_nav_pct: 20.0
+maximum_cluster_nav_pct: 10.0
+initial_stop_policy: TRAILING_STOP_6PCT
+profit_policy: TIME_STOP_20SESSIONS
+time_stop_sessions: 20
+negative_blacklist_sessions: 20
+benchmark_id: NIFTY500
+cost_model_id: STATUTORY_EQUITY_DELIVERY_V1
+model_prompt_version: v1
+review_required: true
+effective_from: "2026-09-01T00:00:00Z"
+effective_to: "2027-09-01T00:00:00Z"
+owner: Quantitative Research
+change_reason: Strategy paused pursuant to Section 19 acceptance failure (alpha deficit)

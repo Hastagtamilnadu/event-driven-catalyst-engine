@@ -1,0 +1,90 @@
+from __future__ import annotations
+
+from enum import Enum, IntEnum
+
+
+class EventType(str, Enum):
+    CREDIT_UPGRADE = "CREDIT_UPGRADE"
+    EXECUTED_CONTRACT = "EXECUTED_CONTRACT"
+    ORDER_WIN = "ORDER_WIN"
+    USFDA_WARNING_LETTER = "USFDA_WARNING_LETTER"
+    USFDA_FINAL_CLASSIFICATION = "USFDA_FINAL_CLASSIFICATION"
+    CALENDAR_EVENT = "CALENDAR_EVENT"
+    NEGATIVE_GOVERNANCE = "NEGATIVE_GOVERNANCE"
+    CAPACITY_EXPANSION = "CAPACITY_EXPANSION"
+    ENVIRONMENTAL_CLEARANCE = "ENVIRONMENTAL_CLEARANCE"
+
+
+class FirmnessLevel(IntEnum):
+    UNCONFIRMED_RUMOR = 0
+    MANAGEMENT_INTENT = 1
+    TENDER_PARTICIPATION = 2
+    L1_STATUS = 3
+    BOARD_APPROVED_MOU = 4
+    EXECUTED_CONTRACT = 5
+
+
+class SourceId(str, Enum):
+    S1_EXCHANGE = "S1_EXCHANGE"
+    S2_RATINGS = "S2_RATINGS"
+    S3_REGULATOR_USFDA = "S3_REGULATOR_USFDA"
+    S4_PARIVESH = "S4_PARIVESH"
+    S5_TENDERS = "S5_TENDERS"
+    S6_TRANSCRIPTS = "S6_TRANSCRIPTS"
+    S7_OWNERSHIP = "S7_OWNERSHIP"
+    S8_SURVEILLANCE = "S8_SURVEILLANCE"
+    S9_MANUAL = "S9_MANUAL"
+
+
+class Recommendation(str, Enum):
+    BUY_CANDIDATE = "BUY_CANDIDATE"
+    WATCH = "WATCH"
+    PASS = "PASS"
+    BLOCK = "BLOCK"
+
+
+class Confidence(str, Enum):
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"
+
+
+class OrderType(str, Enum):
+    LIMIT = "LIMIT"
+    MARKET = "MARKET"
+    MOO = "MOO"
+    MOC = "MOC"
+
+
+class OrderSide(str, Enum):
+    BUY = "BUY"
+    SELL = "SELL"
+
+
+class OrderStatus(str, Enum):
+    PENDING = "PENDING"
+    SUBMITTED = "SUBMITTED"
+    PARTIALLY_FILLED = "PARTIALLY_FILLED"
+    FILLED = "FILLED"
+    CANCELLED = "CANCELLED"
+    REJECTED = "REJECTED"
+
+
+class PositionStatus(str, Enum):
+    OPEN = "OPEN"
+    CLOSED = "CLOSED"
+
+
+class ReviewStatus(str, Enum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    EXPIRED = "EXPIRED"
+
+
+class RelationshipType(str, Enum):
+    PARENT_COMPANY = "PARENT_COMPANY"
+    SUBSIDIARY = "SUBSIDIARY"
+    JOINT_VENTURE = "JOINT_VENTURE"
+    PROMOTER_ENTITY = "PROMOTER_ENTITY"
+    SPV = "SPV"
