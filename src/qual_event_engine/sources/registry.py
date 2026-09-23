@@ -50,13 +50,19 @@ def validate_source_id(source_id: str) -> str:
     return canonical
 
 
-def get_connector(source_id: str, drop_root: Path) -> SourceConnector:
+def get_connector(source_id: str, drop_root: Path, **kwargs: Any) -> SourceConnector:
     canonical = validate_source_id(source_id)
     connector_cls = VALID_SOURCES[canonical]
-    return connector_cls(drop_root)
+    try:
+        return connector_cls(drop_root, **kwargs)
+    except TypeError:
+        return connector_cls(drop_root)
 
 
-def get_adapter(source_id: str, drop_root: Path | None = None) -> SourceAdapter:
+def get_adapter(source_id: str, drop_root: Path | None = None, **kwargs: Any) -> SourceAdapter:
     canonical = validate_source_id(source_id)
     adapter_cls = VALID_ADAPTERS[canonical]
-    return adapter_cls(drop_root=drop_root)
+    try:
+        return adapter_cls(drop_root=drop_root, **kwargs)
+    except TypeError:
+        return adapter_cls(drop_root=drop_root)

@@ -46,6 +46,10 @@ foreach ($dir in $requiredDirs) {
     Write-Host "  -> Created directory: $dir"
   }
 }
+$dataRoot = if ($env:QUAL_ENGINE_DATA_ROOT) { $env:QUAL_ENGINE_DATA_ROOT } else { "D:\02_Trading\data" }
+if (-not (Test-Path $dataRoot)) {
+  throw "FATAL: required data root missing: $dataRoot"
+}
 Write-Host "  -> All required directories verified." -ForegroundColor Green
 
 # 4. Run database migrations

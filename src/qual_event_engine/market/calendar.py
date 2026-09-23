@@ -4,6 +4,35 @@ from datetime import UTC, date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 IST = ZoneInfo("Asia/Kolkata")
+ISO_UTC_Z = "+00:00"
+
+
+def iso_to_utc(value: str) -> datetime:
+    cleaned = value.replace("Z", ISO_UTC_Z)
+    dt = datetime.fromisoformat(cleaned)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=UTC)
+    return dt.astimezone(UTC)
+
+
+def utc_to_ist(dt: datetime) -> datetime:
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=UTC)
+    return dt.astimezone(IST)
+
+
+def ist_to_utc(dt: datetime) -> datetime:
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=IST)
+    return dt.astimezone(UTC)
+
+
+def convert_source_timestamp(value: str, source_tz: str = "UTC") -> datetime:
+    """Convert a source timestamp, including DST-aware zone names, to UTC."""
+    dt = iso_to_utc(value) if "T" in value else datetime.fromisoformat(value)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=ZoneInfo(source_tz))
+    return dt.astimezone(UTC)
 
 MARKET_OPEN_TIME = time(9, 15)
 MARKET_CLOSE_TIME = time(15, 30)

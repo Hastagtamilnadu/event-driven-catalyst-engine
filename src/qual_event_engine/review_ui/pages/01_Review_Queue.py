@@ -166,10 +166,11 @@ if selected_event_id:
                     key="review_decision_val",
                 )
                 rationale = st.text_area("Review Rationale", key="review_rationale")
+                version = st.text_input("Review Version", value="1", key="review_version")
 
                 if st.button("Submit Immutable Decision", type="primary"):
-                    if not reviewer or not rationale:
-                        st.error("Reviewer and Rationale are required.")
+                    if not reviewer or not rationale or not version:
+                        st.error("Reviewer, Rationale, and Version are required.")
                     else:
                         headers = {}
                         token = os.getenv("QUAL_ENGINE_LOCAL_API_TOKEN")
@@ -177,7 +178,12 @@ if selected_event_id:
                             headers["X-Qual-Token"] = token
                         resp = httpx.post(
                             f"{API_URL}/events/{selected_event_id}/review",
-                            json={"reviewer": reviewer, "decision": decision, "rationale": rationale},
+                            json={
+                                "reviewer": reviewer,
+                                "decision": decision,
+                                "rationale": rationale,
+                                "version": version,
+                            },
                             headers=headers,
                             timeout=10,
                         )

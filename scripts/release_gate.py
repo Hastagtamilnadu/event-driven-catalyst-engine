@@ -17,17 +17,17 @@ GATES: list[QualityGate] = [
     QualityGate(
         name="1. Environment & Smoke Test",
         description="Verifies Python 3.11, directories, database initialisation, and configuration loading",
-        command=["uv", "run", "pytest", "tests/test_smoke.py", "-v"],
+        command=["uv", "run", "pytest", "tests/unit/test_smoke.py", "-v"],
     ),
     QualityGate(
         name="2. Database Migrations",
         description="Verifies database migrations, repeatable initialisation, and schema parity",
-        command=["uv", "run", "pytest", "tests/test_migrations.py", "-v"],
+        command=["uv", "run", "pytest", "tests/integration/test_migrations.py", "-v"],
     ),
     QualityGate(
         name="3. Source Adapters & Fixtures",
         description="Tests all 9 source adapters with TLS verification and drop fixtures",
-        command=["uv", "run", "pytest", "tests/test_sources.py", "-v"],
+        command=["uv", "run", "pytest", "tests/unit/test_sources.py", "-v"],
     ),
     QualityGate(
         name="4. Replay & Idempotency & Zero Lookahead",
@@ -36,9 +36,9 @@ GATES: list[QualityGate] = [
             "uv",
             "run",
             "pytest",
-            "tests/test_adversarial_lookahead.py",
-            "tests/test_end_to_end_replay.py",
-            "tests/test_production_pipeline_integration.py",
+            "tests/replay/test_adversarial_lookahead.py",
+            "tests/replay/test_end_to_end_replay.py",
+            "tests/integration/test_production_pipeline_integration.py",
             "-v",
         ],
     ),

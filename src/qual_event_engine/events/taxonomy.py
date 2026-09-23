@@ -16,21 +16,21 @@ class EventTaxonomy:
         "CONTRACT_AWARD": EventType.ORDER_WIN,
         "TENDER_WIN": EventType.EXECUTED_CONTRACT,
         "EXECUTED_CONTRACT": EventType.EXECUTED_CONTRACT,
-        "L1_TENDER": EventType.EXECUTED_CONTRACT,
+        "L1_TENDER": EventType.TENDER_L1,
         "USFDA_APPROVAL": EventType.USFDA_FINAL_CLASSIFICATION,
         "USFDA_EIR": EventType.USFDA_FINAL_CLASSIFICATION,
         "USFDA_WARNING_LETTER": EventType.USFDA_WARNING_LETTER,
-        "USFDA_483": EventType.USFDA_WARNING_LETTER,
-        "ENVIRONMENTAL_CLEARANCE": EventType.ENVIRONMENTAL_CLEARANCE,
-        "PARIVESH_EC": EventType.ENVIRONMENTAL_CLEARANCE,
-        "CAPACITY_EXPANSION": EventType.CAPACITY_EXPANSION,
-        "BOARD_MEETING": EventType.CALENDAR_EVENT,
-        "AGM_EGM": EventType.CALENDAR_EVENT,
-        "CALENDAR_EVENT": EventType.CALENDAR_EVENT,
-        "SURVEILLANCE_ACTION": EventType.NEGATIVE_GOVERNANCE,
-        "PROMOTER_PLEDGE": EventType.NEGATIVE_GOVERNANCE,
-        "AUDITOR_RESIGNATION": EventType.NEGATIVE_GOVERNANCE,
-        "NEGATIVE_GOVERNANCE": EventType.NEGATIVE_GOVERNANCE,
+        "USFDA_483": EventType.USFDA_OBSERVATION,
+        "ENVIRONMENTAL_CLEARANCE": EventType.REGULATORY_APPROVAL,
+        "PARIVESH_EC": EventType.REGULATORY_APPROVAL,
+        "CAPACITY_EXPANSION": EventType.CAPACITY_COMMISSIONED,
+        "BOARD_MEETING": EventType.POLICY_EVENT,
+        "AGM_EGM": EventType.POLICY_EVENT,
+        "CALENDAR_EVENT": EventType.POLICY_EVENT,
+        "SURVEILLANCE_ACTION": EventType.SURVEILLANCE_RESTRICTION,
+        "PROMOTER_PLEDGE": EventType.SURVEILLANCE_RESTRICTION,
+        "AUDITOR_RESIGNATION": EventType.AUDITOR_RESIGNATION,
+        "NEGATIVE_GOVERNANCE": EventType.FORENSIC_ALLEGATION,
     }
 
     @classmethod
@@ -49,8 +49,12 @@ class EventTaxonomy:
                 return EventType.USFDA_WARNING_LETTER
             return EventType.USFDA_FINAL_CLASSIFICATION
         if "ENVIRONMENTAL CLEARANCE" in head_upper or "PARIVESH" in head_upper:
-            return EventType.ENVIRONMENTAL_CLEARANCE
-        if "RESIGNATION" in head_upper or "SURVEILLANCE" in head_upper or "SEBI" in head_upper:
-            return EventType.NEGATIVE_GOVERNANCE
+            return EventType.REGULATORY_APPROVAL
+        if "RESIGNATION" in head_upper:
+            return EventType.AUDITOR_RESIGNATION
+        if "SURVEILLANCE" in head_upper:
+            return EventType.SURVEILLANCE_RESTRICTION
+        if "SEBI" in head_upper:
+            return EventType.FORENSIC_ALLEGATION
 
-        return EventType.CALENDAR_EVENT
+        return EventType.POLICY_EVENT

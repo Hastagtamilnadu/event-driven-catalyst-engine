@@ -107,6 +107,26 @@ def calculate_lead_time_seconds(dissemination_time: datetime, trade_time: dateti
 # §32.3 Size-to-Order-Book Ratio Calculation Formula
 # ---------------------------------------------------------------------------
 
+def event_materiality_ratio(
+    verified_event_value_inr: float | None,
+    point_in_time_ttm_revenue_inr: float | None,
+    *,
+    is_binding_economic_amount: bool = True,
+    is_l1_estimate: bool = False,
+    is_unverified_group_announcement: bool = False,
+) -> float | None:
+    """§32.3: null, not zero, if either input is unavailable or not binding."""
+    if is_l1_estimate or is_unverified_group_announcement:
+        return None
+    if not is_binding_economic_amount:
+        return None
+    if verified_event_value_inr is None or point_in_time_ttm_revenue_inr is None:
+        return None
+    if point_in_time_ttm_revenue_inr <= 0:
+        return None
+    return verified_event_value_inr / point_in_time_ttm_revenue_inr
+
+
 def calculate_materiality_ratio(
     order_value_inr: float,
     order_book_inr: float | None = None,

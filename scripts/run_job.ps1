@@ -18,6 +18,11 @@ $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $projectRoot
 
+$venvActivate = Join-Path $projectRoot ".venv\Scripts\Activate.ps1"
+if (Test-Path $venvActivate) {
+  . $venvActivate
+}
+
 # Resolve canonical job name
 $canonicalJob = switch ($Job) {
   "nightly" { "QualEngine_Nightly" }
@@ -34,6 +39,21 @@ $dateFolder = Join-Path $logRoot (Get-Date -Format "yyyy\\MM\\dd")
 New-Item -ItemType Directory -Force -Path $dateFolder | Out-Null
 $logFile = Join-Path $dateFolder "$canonicalJob.jsonl"
 
+$stdoutLog = Join-Path $dateFolder "$canonicalJob.$RunId.stdout.log"
+$stderrLog = Join-Path $dateFolder "$canonicalJob.$RunId.stderr.log"
+
+function Invoke-LoggedJob {
+  param([string[]]$Command)
+  Write-Host ("  -> " + ($Command -join " "))
+  $stdout = & $Command[0] $Command[1..($Command.Length - 1)] 2>> $stderrLog
+  if ($null -ne $stdout) {
+    $stdout | Tee-Object -FilePath $stdoutLog -Append
+  }
+  if ($LASTEXITCODE -ne 0) {
+    throw ("Command failed with exit code " + $LASTEXITCODE + ": " + ($Command -join " "))
+  }
+}
+
 $startedUtc = [System.DateTime]::UtcNow.ToString("o")
 Write-Host "[$startedUtc] Starting $canonicalJob (RunID: $RunId)..."
 
@@ -48,45 +68,27 @@ Add-Content -Path $logFile -Value $logEntry
 try {
   switch ($canonicalJob) {
     "QualEngine_Nightly" {
-      # Ingest all scheduled sources; archive and process events (§35.2)
-      Write-Host "  -> Running event processing..."
-      uv run qual-engine process-events
-      if ($LASTEXITCODE -ne 0) { throw "process-events failed" }
+      Invoke-LoggedJob @("uv", "run", "qual-engine", "ingest", "--source", "exchange", "--mode", "LIVE_POLL")
+      Invoke-LoggedJob @("uv", "run", "python", "scripts/run_adapter_health_checks.py")
+      Invoke-LoggedJob @("uv", "run", "qual-engine", "process-events")
     }
     "QualEngine_Morning" {
-      # Refresh risk data, universe, actions, and source health (§35.2)
-      Write-Host "  -> Running health and universe check..."
-      uv run qual-engine health
-      if ($LASTEXITCODE -ne 0) { throw "health check failed" }
+      Invoke-LoggedJob @("uv", "run", "qual-engine", "health")
     }
     "QualEngine_PreOpen" {
-      # Create eligible paper intents only (§35.2)
-      Write-Host "  -> Creating paper intents..."
-      uv run qual-engine create-paper-intents
-      if ($LASTEXITCODE -ne 0) { throw "create-paper-intents failed" }
+      Invoke-LoggedJob @("uv", "run", "qual-engine", "create-paper-intents")
     }
     "QualEngine_Intraday" {
-      # Observe supported sources and process queued work (§35.2)
-      Write-Host "  -> Running intraday observer and paper processing..."
-      uv run qual-engine run-paper
-      if ($LASTEXITCODE -ne 0) { throw "run-paper failed" }
+      Invoke-LoggedJob @("uv", "run", "qual-engine", "ingest", "--source", "exchange", "--mode", "LIVE_POLL")
+      Invoke-LoggedJob @("uv", "run", "qual-engine", "run-paper")
     }
     "QualEngine_Close" {
-      # Fills, marks, reconciliation, health report, and SQLite backup (§35.2, §35.3)
-      Write-Host "  -> Running close processing..."
-      uv run qual-engine run-paper
-      if ($LASTEXITCODE -ne 0) { throw "run-paper failed" }
-      uv run qual-engine report --report performance
-      if ($LASTEXITCODE -ne 0) { throw "reconciliation report failed" }
-      Write-Host "  -> Running SQLite backup API..."
-      uv run python scripts/backup_db.py
-      if ($LASTEXITCODE -ne 0) { throw "database backup failed" }
+      Invoke-LoggedJob @("uv", "run", "qual-engine", "run-paper")
+      Invoke-LoggedJob @("uv", "run", "qual-engine", "report", "--report", "performance")
+      Invoke-LoggedJob @("uv", "run", "python", "scripts/backup_db.py")
     }
     "QualEngine_MonthlyAudit" {
-      # Model benchmark, source timing, strategy evidence (§35.2)
-      Write-Host "  -> Running monthly audit benchmark..."
-      uv run pytest tests/test_benchmarks.py -q
-      if ($LASTEXITCODE -ne 0) { throw "monthly benchmark failed" }
+      Invoke-LoggedJob @("uv", "run", "pytest", "tests/unit/test_benchmarks.py", "-q")
     }
   }
 

@@ -3,6 +3,8 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
+from qual_event_engine.domain.enums import ParserQuality
+
 
 @dataclass(frozen=True, slots=True)
 class QualityMetrics:
@@ -70,3 +72,17 @@ def evaluate_text_quality(text: str) -> QualityMetrics:
         gibberish_score=round(gibberish_score, 4),
         quality_grade=grade,
     )
+
+
+def classify_parser_quality(text: str, malware_scan_failed: bool = False) -> ParserQuality:
+    """§29.3 parser-quality classification using exact artifact names."""
+    if malware_scan_failed:
+        return ParserQuality.MALICIOUS
+    metrics = evaluate_text_quality(text)
+    if metrics.quality_grade == "GOOD":
+        return ParserQuality.GOOD
+    if metrics.quality_grade == "PARTIAL":
+        return ParserQuality.PARTIAL
+    if metrics.quality_grade in {"OCR_REQUIRED", "FAILED"}:
+        return ParserQuality.OCR_REQUIRED
+    return ParserQuality.UNSUPPORTED

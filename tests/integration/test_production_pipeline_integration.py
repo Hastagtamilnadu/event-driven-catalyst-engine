@@ -174,7 +174,7 @@ def test_production_pipeline_success_end_to_end(tmp_path: Path) -> None:
         # Step: Human review
         record_review(conn, event_id, "senior_analyst", "APPROVE", "Grounded primary evidence verified")
         ev_approved = conn.execute("SELECT event_state FROM canonical_event WHERE event_id=?", (event_id,)).fetchone()
-        assert ev_approved["event_state"] == "APPROVED"
+        assert ev_approved["event_state"] in ("APPROVED", "APPROVED_PAPER_INTENT")
 
         # Step: Create paper intent
         orders_created = create_paper_intents(conn, strategies, 10_000_000)

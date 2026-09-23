@@ -20,7 +20,7 @@ def test_database_initialisation_and_repeatable_migrations(tmp_path: Path) -> No
         # Check table count (23 tables)
         cursor.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
         count_1 = cursor.fetchone()[0]
-        assert count_1 == 23
+        assert count_1 == 24
 
     # Step 2: Re-run initialise to prove idempotency
     initialise(db_path)

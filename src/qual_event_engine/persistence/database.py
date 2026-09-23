@@ -25,6 +25,7 @@ def initialise(path: Path) -> None:
     try:
         connection.executescript(SCHEMA_SQL)
         apply_compatible_migrations(connection)
+        connection.commit()
     finally:
         connection.close()
 

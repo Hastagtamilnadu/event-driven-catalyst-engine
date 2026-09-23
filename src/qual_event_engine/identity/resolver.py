@@ -33,11 +33,13 @@ class EntityResolver:
         self._isin_to_meta: dict[str, dict[str, str]] = {}
         self._symbol_to_isin: dict[str, str] = {}
         self._name_to_isin: dict[str, str] = {}
+        self._exact_name_to_isin: dict[str, str] = {}
 
     def register_security(self, isin: str, symbol: str, legal_name: str) -> None:
         meta = {"isin": isin, "symbol": symbol.upper(), "legal_name": legal_name}
         self._isin_to_meta[isin] = meta
         self._symbol_to_isin[symbol.upper()] = isin
+        self._exact_name_to_isin[legal_name.upper().strip()] = isin
         norm_name = self.aliases.normalize_name(legal_name)
         if norm_name:
             self._name_to_isin[norm_name] = isin
@@ -63,36 +65,35 @@ class EntityResolver:
             )
 
         # 2. Exact Symbol match
-        if symbol_hint:
-            sym_clean = symbol_hint.upper().strip()
-            if sym_clean in self._symbol_to_isin:
-                isin = self._symbol_to_isin[sym_clean]
-                meta = self._isin_to_meta.get(isin, {})
-                return ResolvedEntity(
-                    isin=isin,
-                    symbol=sym_clean,
-                    legal_name=meta.get("legal_name", raw_name),
-                    confidence=1.0,
-                    match_method="EXACT_SYMBOL",
-                    requires_review=False,
-                )
+        if symbol_hint and symbol_hint.upper() in self._symbol_to_isin:
+            isin = self._symbol_to_isin[symbol_hint.upper()]
+            meta = self._isin_to_meta.get(isin, {})
+            return ResolvedEntity(
+                isin=isin,
+                symbol=symbol_hint.upper(),
+                legal_name=meta.get("legal_name", raw_name),
+                confidence=0.99,
+                match_method="EXACT_SYMBOL",
+                requires_review=False,
+            )
 
-        # 3. Exact Normalized Name match
-        norm = self.aliases.normalize_name(raw_name)
-        if norm in self._name_to_isin:
-            isin = self._name_to_isin[norm]
+        # 3. Exact Legal Name match
+        raw_clean = raw_name.upper().strip()
+        if raw_clean in self._exact_name_to_isin:
+            isin = self._exact_name_to_isin[raw_clean]
             meta = self._isin_to_meta.get(isin, {})
             return ResolvedEntity(
                 isin=isin,
                 symbol=meta.get("symbol"),
                 legal_name=meta.get("legal_name", raw_name),
-                confidence=0.98,
+                confidence=1.0,
                 match_method="EXACT_NAME",
                 requires_review=False,
             )
 
         # 4. Alias lookup
         alias_isin = self.aliases.lookup(raw_name)
+        norm = self.aliases.normalize_name(raw_name)
         if alias_isin and alias_isin in self._isin_to_meta:
             meta = self._isin_to_meta[alias_isin]
             return ResolvedEntity(
@@ -105,33 +106,18 @@ class EntityResolver:
             )
 
         # 5. Fuzzy Match against known names
-        best_match_isin: str | None = None
         best_ratio = 0.0
         for known_norm, isin in self._name_to_isin.items():
             ratio = SequenceMatcher(None, norm, known_norm).ratio()
-            if ratio > best_ratio:
-                best_ratio = ratio
-                best_match_isin = isin
+            best_ratio = max(best_ratio, ratio)
 
-        if best_ratio >= 0.85 and best_match_isin:
-            meta = self._isin_to_meta.get(best_match_isin, {})
+        if best_ratio >= 0.65:
             return ResolvedEntity(
-                isin=best_match_isin,
-                symbol=meta.get("symbol"),
-                legal_name=meta.get("legal_name", raw_name),
+                isin=None,
+                symbol=symbol_hint,
+                legal_name=raw_name,
                 confidence=round(best_ratio, 2),
-                match_method="FUZZY_NAME",
-                requires_review=best_ratio < 0.90,
-            )
-
-        if best_ratio >= 0.65 and best_match_isin:
-            meta = self._isin_to_meta.get(best_match_isin, {})
-            return ResolvedEntity(
-                isin=best_match_isin,
-                symbol=meta.get("symbol"),
-                legal_name=meta.get("legal_name", raw_name),
-                confidence=round(best_ratio, 2),
-                match_method="FUZZY_NAME",
+                match_method="FUZZY_MATCH_REJECTED",
                 requires_review=True,
             )
 

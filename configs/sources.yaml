@@ -1,100 +1,248 @@
+# §27.2 Source configuration — all 19 required fields per source
+# Exact field names as specified in Version 6.0 artifact §27.2.
+# Adapter cannot run if terms_url, base_url, cursor_type,
+# required_fields, or health range are absent.
+
 sources:
   exchange:
+    source_id: S1_EXCHANGE
     enabled: true
     mode: PAPER_SIGNAL
-    input_contract: manifest.jsonl
+    adapter_class: qual_event_engine.sources.exchange.ExchangeAdapter
     base_url: https://www.nseindia.com/companies-listing/corporate-filings-announcements
     terms_url: https://www.nseindia.com/terms-of-use
-    cursor_strategy: timestamp
-    health_bounds:
-      min_daily_records: 5
-      max_daily_records: 5000
-      max_failure_rate: 0.02
+    polling_schedule: "45 23 * * 1-5"
+    request_timeout_seconds: 30
+    max_retries: 3
+    backoff_seconds: 5
+    rate_limit_per_minute: 30
+    cursor_type: timestamp
+    required_fields:
+      - source_native_id
+      - source_published_at_utc
+      - source_url
+      - raw_sha256
+    document_types:
+      - application/pdf
+      - text/html
+    entity_requirement: MANDATORY
+    publication_time_field: source_published_at_utc
+    health_min_count: 5
+    health_max_count: 5000
+    archive_retention_days: 3650
+
   ratings:
+    source_id: S2_RATINGS
     enabled: true
     mode: PAPER_SIGNAL
-    input_contract: manifest.jsonl
+    adapter_class: qual_event_engine.sources.ratings.RatingsAdapter
     base_url: https://www.crisil.com/en/home/our-businesses/ratings/rating-actions.html
     terms_url: https://www.crisil.com/en/home/terms-and-conditions.html
-    cursor_strategy: timestamp
-    health_bounds:
-      min_daily_records: 1
-      max_daily_records: 1000
-      max_failure_rate: 0.01
+    polling_schedule: "45 23 * * 1-5"
+    request_timeout_seconds: 30
+    max_retries: 3
+    backoff_seconds: 5
+    rate_limit_per_minute: 20
+    cursor_type: timestamp
+    required_fields:
+      - source_native_id
+      - source_published_at_utc
+      - source_url
+      - raw_sha256
+    document_types:
+      - application/pdf
+      - text/html
+    entity_requirement: MANDATORY
+    publication_time_field: source_published_at_utc
+    health_min_count: 1
+    health_max_count: 1000
+    archive_retention_days: 3650
+
   tenders:
+    source_id: S3_TENDERS
     enabled: true
     mode: PAPER_SIGNAL
-    input_contract: manifest.jsonl
+    adapter_class: qual_event_engine.sources.tenders.TendersAdapter
     base_url: https://gem.gov.in/contracts
     terms_url: https://gem.gov.in/terms-and-conditions
-    cursor_strategy: timestamp
-    health_bounds:
-      min_daily_records: 1
-      max_daily_records: 2000
-      max_failure_rate: 0.05
+    polling_schedule: "45 23 * * 1-7"
+    request_timeout_seconds: 45
+    max_retries: 3
+    backoff_seconds: 10
+    rate_limit_per_minute: 15
+    cursor_type: timestamp
+    required_fields:
+      - source_native_id
+      - source_published_at_utc
+      - source_url
+      - raw_sha256
+    document_types:
+      - application/pdf
+      - text/html
+      - application/json
+    entity_requirement: MANDATORY
+    publication_time_field: source_published_at_utc
+    health_min_count: 1
+    health_max_count: 2000
+    archive_retention_days: 3650
+
   usfda:
+    source_id: S4_USFDA
     enabled: true
     mode: PAPER_SIGNAL
-    input_contract: manifest.jsonl
+    adapter_class: qual_event_engine.sources.usfda.UsfDAAdapter
     base_url: https://www.fda.gov/drugs/drug-approvals-and-databases
     terms_url: https://www.fda.gov/about-fda/about-website/website-disclaimer
-    cursor_strategy: sequence
-    health_bounds:
-      min_daily_records: 0
-      max_daily_records: 100
-      max_failure_rate: 0.01
+    polling_schedule: "0 8 * * 1-7"
+    request_timeout_seconds: 45
+    max_retries: 3
+    backoff_seconds: 10
+    rate_limit_per_minute: 10
+    cursor_type: sequence
+    required_fields:
+      - source_native_id
+      - source_published_at_utc
+      - source_url
+      - raw_sha256
+    document_types:
+      - application/pdf
+      - text/html
+    entity_requirement: MANDATORY
+    publication_time_field: source_published_at_utc
+    health_min_count: 0
+    health_max_count: 100
+    archive_retention_days: 3650
+
   parivesh:
+    source_id: S5_PARIVESH
     enabled: true
     mode: PAPER_SIGNAL
-    input_contract: manifest.jsonl
+    adapter_class: qual_event_engine.sources.parivesh.PariveshAdapter
     base_url: https://parivesh.nic.in/
     terms_url: https://parivesh.nic.in/terms.html
-    cursor_strategy: timestamp
-    health_bounds:
-      min_daily_records: 0
-      max_daily_records: 500
-      max_failure_rate: 0.05
+    polling_schedule: "45 23 * * 1-7"
+    request_timeout_seconds: 60
+    max_retries: 2
+    backoff_seconds: 15
+    rate_limit_per_minute: 10
+    cursor_type: timestamp
+    required_fields:
+      - source_native_id
+      - source_published_at_utc
+      - source_url
+      - raw_sha256
+    document_types:
+      - application/pdf
+      - text/html
+    entity_requirement: MANDATORY
+    publication_time_field: source_published_at_utc
+    health_min_count: 0
+    health_max_count: 500
+    archive_retention_days: 3650
+
   transcripts:
+    source_id: S6_TRANSCRIPTS
     enabled: true
     mode: CONTEXT_ONLY
-    input_contract: manifest.jsonl
+    adapter_class: qual_event_engine.sources.transcripts.TranscriptsAdapter
     base_url: https://www.nseindia.com/companies-listing/corporate-filings-transcripts
     terms_url: https://www.nseindia.com/terms-of-use
-    cursor_strategy: timestamp
-    health_bounds:
-      min_daily_records: 0
-      max_daily_records: 500
-      max_failure_rate: 0.05
+    polling_schedule: "45 23 * * 1-5"
+    request_timeout_seconds: 30
+    max_retries: 3
+    backoff_seconds: 5
+    rate_limit_per_minute: 20
+    cursor_type: timestamp
+    required_fields:
+      - source_native_id
+      - source_published_at_utc
+      - source_url
+      - raw_sha256
+    document_types:
+      - application/pdf
+    entity_requirement: MANDATORY
+    publication_time_field: source_published_at_utc
+    health_min_count: 0
+    health_max_count: 500
+    archive_retention_days: 1825
+
   ownership:
+    source_id: S7_OWNERSHIP
     enabled: true
     mode: CONTEXT_ONLY
-    input_contract: manifest.jsonl
+    adapter_class: qual_event_engine.sources.ownership.OwnershipAdapter
     base_url: https://www.nseindia.com/companies-listing/corporate-filings-shareholding-pattern
     terms_url: https://www.nseindia.com/terms-of-use
-    cursor_strategy: timestamp
-    health_bounds:
-      min_daily_records: 0
-      max_daily_records: 500
-      max_failure_rate: 0.05
+    polling_schedule: "45 23 * * 1-5"
+    request_timeout_seconds: 30
+    max_retries: 3
+    backoff_seconds: 5
+    rate_limit_per_minute: 20
+    cursor_type: timestamp
+    required_fields:
+      - source_native_id
+      - source_published_at_utc
+      - source_url
+      - raw_sha256
+    document_types:
+      - application/pdf
+      - text/html
+    entity_requirement: MANDATORY
+    publication_time_field: source_published_at_utc
+    health_min_count: 0
+    health_max_count: 500
+    archive_retention_days: 3650
+
   surveillance:
+    source_id: S8_SURVEILLANCE
     enabled: true
     mode: ACTIVE_RISK_OVERLAY
-    input_contract: manifest.jsonl
+    adapter_class: qual_event_engine.sources.surveillance.SurveillanceAdapter
     base_url: https://www.nseindia.com/reports/surveillance
     terms_url: https://www.nseindia.com/terms-of-use
-    cursor_strategy: timestamp
-    health_bounds:
-      min_daily_records: 1
-      max_daily_records: 500
-      max_failure_rate: 0.01
+    polling_schedule: "30 8 * * 1-5"
+    request_timeout_seconds: 20
+    max_retries: 5
+    backoff_seconds: 3
+    rate_limit_per_minute: 60
+    cursor_type: timestamp
+    required_fields:
+      - source_native_id
+      - source_published_at_utc
+      - source_url
+      - raw_sha256
+    document_types:
+      - text/html
+      - application/json
+    entity_requirement: MANDATORY
+    publication_time_field: source_published_at_utc
+    health_min_count: 1
+    health_max_count: 500
+    archive_retention_days: 730
+
   calendar:
+    source_id: S9_CALENDAR
     enabled: true
     mode: PAPER_SIGNAL
-    input_contract: manifest.jsonl
+    adapter_class: qual_event_engine.sources.calendar.CalendarAdapter
     base_url: https://www.nseindia.com/companies-listing/corporate-filings-board-meetings
     terms_url: https://www.nseindia.com/terms-of-use
-    cursor_strategy: timestamp
-    health_bounds:
-      min_daily_records: 1
-      max_daily_records: 1000
-      max_failure_rate: 0.02
+    polling_schedule: "45 23 * * 1-5"
+    request_timeout_seconds: 30
+    max_retries: 3
+    backoff_seconds: 5
+    rate_limit_per_minute: 30
+    cursor_type: timestamp
+    required_fields:
+      - source_native_id
+      - source_published_at_utc
+      - source_url
+      - raw_sha256
+    document_types:
+      - text/html
+      - application/json
+    entity_requirement: MANDATORY
+    publication_time_field: source_published_at_utc
+    health_min_count: 1
+    health_max_count: 1000
+    archive_retention_days: 1825

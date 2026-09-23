@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 
@@ -82,3 +83,80 @@ class PerformanceCalculator:
             max_drawdown_pct=round(max_dd * 100.0, 2),
             sharpe_ratio=round(sharpe, 2),
         )
+
+
+@dataclass(frozen=True, slots=True)
+class StrategyBenchmarkReport:
+    """§18.2: every strategy defines its benchmark before measurement."""
+
+    strategy_id: str
+    benchmark_id: str
+    window: str
+    raw_return: float
+    sector_or_nifty_benchmark_return: float
+    matched_market_cap_liquidity_control_return: float
+    event_day_gap: float
+    maximum_favourable_excursion: float
+    maximum_adverse_excursion: float
+    holding_period: int
+    gross_return: float
+    net_return: float
+
+
+def strategy_benchmark_report(
+    *,
+    strategy_id: str,
+    benchmark_id: str,
+    window: str,
+    entry_price: float,
+    exit_price: float,
+    high_while_held: float,
+    low_while_held: float,
+    holding_period: int,
+    sector_or_nifty_benchmark_return: float,
+    matched_market_cap_liquidity_control_return: float,
+    event_day_gap: float,
+    total_cost_inr: float,
+    quantity: int,
+) -> StrategyBenchmarkReport:
+    if not benchmark_id or not window:
+        raise ValueError("Excess return is never used without a benchmark and time window")
+    if entry_price <= 0:
+        raise ValueError("entry_price must be positive")
+    raw = (exit_price - entry_price) / entry_price
+    mfe = (high_while_held - entry_price) / entry_price
+    mae = (low_while_held - entry_price) / entry_price
+    gross = raw
+    net_pnl = (exit_price - entry_price) * quantity - total_cost_inr
+    net = net_pnl / (entry_price * quantity) if quantity else gross
+    return StrategyBenchmarkReport(
+        strategy_id=strategy_id,
+        benchmark_id=benchmark_id,
+        window=window,
+        raw_return=raw,
+        sector_or_nifty_benchmark_return=sector_or_nifty_benchmark_return,
+        matched_market_cap_liquidity_control_return=matched_market_cap_liquidity_control_return,
+        event_day_gap=event_day_gap,
+        maximum_favourable_excursion=mfe,
+        maximum_adverse_excursion=mae,
+        holding_period=holding_period,
+        gross_return=gross,
+        net_return=net,
+    )
+
+
+def strategy_benchmark_report_as_dict(report: StrategyBenchmarkReport) -> dict[str, Any]:
+    return {
+        "strategy_id": report.strategy_id,
+        "benchmark_id": report.benchmark_id,
+        "window": report.window,
+        "raw_return": report.raw_return,
+        "sector_or_nifty_benchmark_return": report.sector_or_nifty_benchmark_return,
+        "matched_market_cap_liquidity_control_return": report.matched_market_cap_liquidity_control_return,
+        "event_day_gap": report.event_day_gap,
+        "maximum_favourable_excursion": report.maximum_favourable_excursion,
+        "maximum_adverse_excursion": report.maximum_adverse_excursion,
+        "holding_period": report.holding_period,
+        "gross_return": report.gross_return,
+        "net_return": report.net_return,
+    }

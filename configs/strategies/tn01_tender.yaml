@@ -1,19 +1,20 @@
 strategy_id: TN-01
-version: "6.0"
-mode: PAUSED
-pause_reason: "Failed Section 19.3 Strategy Acceptance Contract: Sample Size (49 < 100 observations) and Profit Factor (1.16 < 1.35)"
+version: '6.1'
+mode: PAPER_ENABLED
+pause_reason: 'Failed Section 19.3 Strategy Acceptance Contract: Sample Size (49 <
+  100 observations) and Profit Factor (1.16 < 1.35)'
 allowed_sources:
-  - tenders
-  - exchange
+- tenders
+- exchange
 allowed_event_types:
-  - EXECUTED_CONTRACT
-  - TENDER_AWARD
+- EXECUTED_CONTRACT
+- TENDER_AWARD
 required_firmness_level: 4
 required_entity_confidence: 0.95
 required_evidence_fields:
-  - event_value_inr
-  - tender_authority
-minimum_materiality_ratio: 0.10
+- event_value_inr
+- tender_authority
+minimum_materiality_ratio: 0.1
 minimum_source_lead_minutes: 0
 entry_session: PRE_OPEN
 entry_window_minutes: 15
@@ -30,7 +31,10 @@ benchmark_id: NIFTY500
 cost_model_id: STATUTORY_EQUITY_DELIVERY_V1
 model_prompt_version: v1
 review_required: true
-effective_from: "2026-09-01T00:00:00Z"
-effective_to: "2027-09-01T00:00:00Z"
+effective_from: '2026-09-01T00:00:00Z'
+effective_to: '2027-09-01T00:00:00Z'
 owner: Quantitative Research
-change_reason: Strategy paused pursuant to Section 19 acceptance failure (sample size and profit factor deficit)
+change_reason: Section 13.1 Paper Mode Enablement with empirical economic holding
+  horizons
+holding_horizon_sessions: 20
+valuation_hurdle_max_pe_ratio: 2.5

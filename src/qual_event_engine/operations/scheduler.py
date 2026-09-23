@@ -93,7 +93,8 @@ class DailyScheduler:
             )
 
         try:
-            details = handler()
+            details = dict(handler())
+            details.setdefault("idempotent_checkpoint", phase_name)
             return PhaseExecutionResult(
                 phase_number=0,
                 phase_name=phase_name,

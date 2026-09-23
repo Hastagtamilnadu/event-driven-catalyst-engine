@@ -1,55 +1,67 @@
 strategies:
   CR-01:
-    enabled: false  # PAUSED: Failed Section 19.3 alpha acceptance
+    enabled: true  # §13.1 Paper-enabled: Parallel paper portfolio active from platform inception
     event_types: [CREDIT_UPGRADE]
     minimum_firmness_level: 4
     maximum_position_nav_pct: 2.0
     maximum_participation_pct: 1.0
     stop_loss_pct: 6.0
-    time_stop_sessions: 20
+    time_stop_sessions: 30
+    holding_horizon_sessions: 30
+    valuation_hurdle_max_pe_ratio: 2.5
     review_required: true
   TN-01:
-    enabled: false  # PAUSED: Failed Section 19.3 alpha acceptance (sample size < 100, PF < 1.35)
+    enabled: true  # §13.1 Paper-enabled: Parallel paper portfolio active from platform inception
     event_types: [EXECUTED_CONTRACT, TENDER_AWARD]
     minimum_firmness_level: 4
     maximum_position_nav_pct: 2.0
     maximum_participation_pct: 1.0
     stop_loss_pct: 6.0
     time_stop_sessions: 20
+    holding_horizon_sessions: 20
+    valuation_hurdle_max_pe_ratio: 2.5
     review_required: true
   OR-01:
-    enabled: false  # PAUSED: Failed Section 19.3 alpha acceptance
+    enabled: true  # §13.1 Paper-enabled: Parallel paper portfolio active from platform inception
     event_types: [ORDER_WIN, ORDER_AWARD]
     minimum_firmness_level: 4
     maximum_position_nav_pct: 2.0
     maximum_participation_pct: 1.0
     stop_loss_pct: 6.0
-    time_stop_sessions: 20
+    time_stop_sessions: 40
+    holding_horizon_sessions: 40
+    valuation_hurdle_max_pe_ratio: 2.5
     review_required: true
   FD-01:
-    enabled: false  # PAUSED: Failed Section 19.3 alpha acceptance
+    enabled: true  # §13.1 Paper-enabled: Parallel paper portfolio active from platform inception
     event_types: [USFDA_WARNING_LETTER, USFDA_FINAL_CLASSIFICATION]
     minimum_firmness_level: 4
     maximum_position_nav_pct: 2.0
     maximum_participation_pct: 1.0
     stop_loss_pct: 6.0
-    time_stop_sessions: 5
+    time_stop_sessions: 30
+    holding_horizon_sessions: 30
+    valuation_hurdle_max_pe_ratio: 2.5
     review_required: true
   CL-01:
-    enabled: false  # PAUSED: Failed Section 19.3 alpha acceptance
+    enabled: true  # §13.1 Paper-enabled: Parivesh capacity expansion Capex cycle re-rating
     event_types: [CALENDAR_EVENT, REGULATORY_APPROVAL, CAPACITY_EXPANSION]
     minimum_firmness_level: 4
     maximum_position_nav_pct: 2.0
     maximum_participation_pct: 1.0
     stop_loss_pct: 6.0
-    time_stop_sessions: 10
+    time_stop_sessions: 60
+    holding_horizon_sessions: 60
+    valuation_hurdle_max_pe_ratio: 2.5
     review_required: true
   GV-01:
-    enabled: false  # PAUSED FOR ALPHA ENTRY: Active protective risk overlay only (maximum_position_nav_pct: 0.0)
+    enabled: true  # §13.1 Active protective risk overlay only (maximum_position_nav_pct: 0.0)
     event_types: [NEGATIVE_GOVERNANCE, USFDA_WARNING_LETTER, AUDITOR_RESIGNATION, CFO_RESIGNATION, DEFAULT, FORENSIC_ALLEGATION]
     minimum_firmness_level: 4
     maximum_position_nav_pct: 0.0
     maximum_participation_pct: 1.0
     stop_loss_pct: 0.0
     time_stop_sessions: 0
+    holding_horizon_sessions: 0
+    valuation_hurdle_max_pe_ratio: 2.5
     review_required: false

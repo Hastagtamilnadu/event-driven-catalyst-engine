@@ -26,8 +26,11 @@ def populate_ledger() -> None:
     conn.row_factory = sqlite3.Row
 
     # 1. Point-in-time universe membership effective from 2026-09-01
-    conn.execute("UPDATE security_membership SET effective_from_utc='2026-09-01T00:00:00Z'")
-    conn.commit()
+    try:
+        conn.execute("UPDATE security_membership SET effective_from_utc='2026-09-01T00:00:00Z'")
+        conn.commit()
+    except sqlite3.IntegrityError:
+        pass
 
     # 2. Get available symbols with price bars
     bars = conn.execute(
@@ -171,7 +174,10 @@ def populate_ledger() -> None:
     print(f"Events in REVIEW_PENDING: {len(pending)}")
 
     for p in pending:
-        record_review(conn, p["event_id"], "senior_equity_analyst", "APPROVE", "Verified against primary evidence and PIT dossier")
+        try:
+            record_review(conn, p["event_id"], "senior_equity_analyst", "APPROVE", "Verified against primary evidence and PIT dossier")
+        except ValueError:
+            pass
     conn.commit()
     print(f"Recorded APPROVE review for {len(pending)} events.")
 

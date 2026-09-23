@@ -61,6 +61,8 @@ class StrategyConfig(BaseModel):
     stop_loss_pct: float = Field(ge=0, le=100)
     time_stop_sessions: int = Field(ge=0)
     review_required: bool
+    holding_horizon_sessions: int | None = None
+    valuation_hurdle_max_pe_ratio: float | None = None
 
 
 class FactExtraction(BaseModel):

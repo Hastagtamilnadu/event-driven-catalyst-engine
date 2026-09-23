@@ -1,8 +1,14 @@
 from __future__ import annotations
 
+import json
 import sqlite3
 from dataclasses import dataclass
 from datetime import datetime
+
+ELIGIBLE_SERIES = frozenset({"EQ", "BE"})
+INELIGIBLE_SURVEILLANCE = frozenset({"ASM", "GSM", "ESM", "T2T", "STAGE1", "STAGE2", "STAGE3"})
+MIN_PRICE_BAND_PCT = 5.0
+MIN_ADT20_INR = 20_000_000.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,14 +55,14 @@ class SecurityUniverse:
                     price_band_pct=r[6],
                     adt20_inr=r[7],
                     eligible=bool(r[8]),
-                    eligibility_reasons=eval(r[9]) if isinstance(r[9], str) and r[9].startswith("[") else [],
+                    eligibility_reasons=_parse_eligibility_reasons(r[9]),
                 )
             )
         return result
 
     def is_security_eligible(self, symbol_or_isin: str, as_of_utc: datetime) -> tuple[bool, str]:
         query = """
-            SELECT eligible, surveillance_status, price_band_pct, adt20_inr
+            SELECT eligible, surveillance_status, price_band_pct, adt20_inr, series
             FROM security_membership
             WHERE (symbol = ? OR isin = ?)
               AND effective_from_utc <= ?
@@ -71,11 +77,30 @@ class SecurityUniverse:
         row = cursor.fetchone()
         if not row:
             return False, "SECURITY_NOT_FOUND_IN_UNIVERSE"
-        eligible, surv, pb, adt = row
+        eligible, surv, pb, adt, series = row
         if not eligible:
-            return False, f"INELIGIBLE_MEMBERSHIP (surv={surv}, pb={pb}, adt={adt})"
-        if surv and surv not in ("NONE", "NORMAL", ""):
-            return False, f"SURVEILLANCE_FLAG_{surv}"
-        if pb is not None and pb < 5.0:
-            return False, f"TIGHT_PRICE_BAND_{pb}%"
+            return False, "INELIGIBLE_MEMBERSHIP (surv=" + str(surv) + ", pb=" + str(pb) + ", adt=" + str(adt) + ")"
+        if series and str(series).upper() not in ELIGIBLE_SERIES:
+            return False, "SERIES_INELIGIBLE_" + str(series)
+        surv_u = str(surv or "").upper()
+        if surv_u in INELIGIBLE_SURVEILLANCE or (surv_u and surv_u not in {"NONE", "NORMAL"}):
+            return False, "SURVEILLANCE_FLAG_" + str(surv)
+        if pb is not None and float(pb) < MIN_PRICE_BAND_PCT:
+            return False, "TIGHT_PRICE_BAND_" + str(pb) + "pct"
+        if adt is not None and float(adt) < MIN_ADT20_INR:
+            return False, "LIQUIDITY_ADT20_BELOW_THRESHOLD"
         return True, "ELIGIBLE"
+
+
+def _parse_eligibility_reasons(raw: object) -> list[str]:
+    if isinstance(raw, list):
+        return [str(x) for x in raw]
+    if not isinstance(raw, str) or not raw.strip():
+        return []
+    try:
+        parsed = json.loads(raw)
+        if isinstance(parsed, list):
+            return [str(x) for x in parsed]
+    except json.JSONDecodeError:
+        return [raw]
+    return []

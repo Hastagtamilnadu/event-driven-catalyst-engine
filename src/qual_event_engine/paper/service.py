@@ -131,6 +131,7 @@ def process_pending_orders(
     strategies: dict[str, StrategyConfig],
     paper_nav_inr: float,
     as_of_utc: str | None = None,
+    session_id: str | None = None,
 ) -> dict[str, int]:
     stats = {"filled": 0, "partially_filled": 0, "expired": 0, "unfilled": 0, "exit_unfilled": 0}
     now = as_of_utc or datetime.now(UTC).isoformat()

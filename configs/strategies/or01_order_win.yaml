@@ -1,17 +1,18 @@
 strategy_id: OR-01
-version: "6.0"
-mode: PAUSED
-pause_reason: "Failed Section 19.3 Strategy Acceptance Contract: Net Expectancy (-3,238.56 INR < 0), Profit Factor (0.89 < 1.35), and Top-2% Outlier Removal"
+version: '6.1'
+mode: PAPER_ENABLED
+pause_reason: 'Failed Section 19.3 Strategy Acceptance Contract: Net Expectancy (-3,238.56
+  INR < 0), Profit Factor (0.89 < 1.35), and Top-2% Outlier Removal'
 allowed_sources:
-  - exchange
+- exchange
 allowed_event_types:
-  - ORDER_WIN
-  - ORDER_AWARD
+- ORDER_WIN
+- ORDER_AWARD
 required_firmness_level: 4
 required_entity_confidence: 0.95
 required_evidence_fields:
-  - event_value_inr
-  - counterparty
+- event_value_inr
+- counterparty
 minimum_materiality_ratio: 0.15
 minimum_source_lead_minutes: 0
 entry_session: PRE_OPEN
@@ -22,14 +23,17 @@ maximum_position_nav_pct: 2.0
 maximum_sector_nav_pct: 20.0
 maximum_cluster_nav_pct: 10.0
 initial_stop_policy: TRAILING_STOP_6PCT
-profit_policy: TIME_STOP_20SESSIONS
-time_stop_sessions: 20
+profit_policy: TIME_STOP_40SESSIONS
+time_stop_sessions: 40
 negative_blacklist_sessions: 20
 benchmark_id: NIFTY500
 cost_model_id: STATUTORY_EQUITY_DELIVERY_V1
 model_prompt_version: v1
 review_required: true
-effective_from: "2026-09-01T00:00:00Z"
-effective_to: "2027-09-01T00:00:00Z"
+effective_from: '2026-09-01T00:00:00Z'
+effective_to: '2027-09-01T00:00:00Z'
 owner: Quantitative Research
-change_reason: Strategy paused pursuant to Section 19 acceptance failure (alpha deficit)
+change_reason: Section 13.1 Paper Mode Enablement with empirical economic holding
+  horizons
+holding_horizon_sessions: 40
+valuation_hurdle_max_pe_ratio: 2.5

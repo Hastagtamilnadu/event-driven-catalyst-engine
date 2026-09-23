@@ -6,3 +6,7 @@ __pycache__/
 *.db
 *.log
 .env
+.env.*
+.coverage
+*.parquet
+*.npz

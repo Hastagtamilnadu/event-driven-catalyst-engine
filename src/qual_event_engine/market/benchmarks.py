@@ -39,18 +39,21 @@ class BenchmarkManager:
         stock_return: float,
         benchmark_symbol: str,
         date_str: str,
-    ) -> float:
+        window: str,
+    ) -> float | None:
+        if not benchmark_symbol or not window:
+            raise ValueError("Excess return is never used without a benchmark and time window")
         bm_bars = self.get_benchmark_bars(benchmark_symbol)
         if bm_bars.empty:
-            return stock_return
+            return None
 
         time_col = "close_time_utc" if "close_time_utc" in bm_bars.columns else ("date" if "date" in bm_bars.columns else None)
         if not time_col:
-            return stock_return
+            return None
 
         match = bm_bars[bm_bars[time_col].astype(str).str.startswith(date_str)]
         if match.empty:
-            return stock_return
+            return None
 
         open_col = "open" if "open" in match.columns else "open_price"
         close_col = "close" if "close" in match.columns else "close_price"
@@ -60,4 +63,4 @@ class BenchmarkManager:
             close_p = float(match[close_col].iloc[-1])
             bm_ret = (close_p - open_p) / open_p if open_p > 0 else 0.0
             return stock_return - bm_ret
-        return stock_return
+        return None
