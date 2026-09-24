@@ -17,70 +17,80 @@ The engine ingests official exchange announcements, credit rating agency release
 
 ```mermaid
 flowchart LR
-    subgraph INGESTION ["Stage 1 — Data Intake & Archival"]
-        direction TB
-        S1["NSE / BSE Corporate Filings\n(Live HTTPS API Polling)"]
-        S2["Credit Rating Releases\n(CRISIL, ICRA, CARE, India Ratings)"]
-        S3["USFDA Regulatory Filings\n(Form 483 / EIR Clearances)"]
-        S4["Parivesh Environmental Approvals\n(Capex & Industrial Clearances)"]
-        ARCH["Document Archiver\n(SHA-256 Cryptographic Checksum)"]
-        TXT["Text Extraction Pipeline\n(PyMuPDF + OCR Routing)"]
+    S1["NSE / BSE Corporate Filings\n(Live HTTPS API Polling)"]
+    S2["Credit Rating Releases\n(CRISIL, ICRA, CARE, India Ratings)"]
+    S3["USFDA Regulatory Filings\n(Form 483 / EIR Clearances)"]
+    S4["Parivesh Environmental Approvals\n(Capex & Industrial Clearances)"]
+    ARCH["Document Archiver\n(SHA-256 Cryptographic Checksum)"]
+    TXT["Text Extraction Pipeline\n(PyMuPDF + OCR Routing)"]
 
-        S1 & S2 & S3 & S4 --> ARCH --> TXT
+    ENT["Master Entity Resolver\n(ISIN, Ticker, Normalized Aliases)"]
+    GRAPH["Group Structure Graph\n(Parent-Subsidiary Mapping)"]
+    TAXO["28-Archetype Event Taxonomy\n(Orders, Ratings, M&A, Governance)"]
+    FIRM["Deterministic Firmness Engine\n(F0 Rumor to F5 Binding Execution)"]
+
+    LLM["Agentic LLM Extraction\n(Pydantic v2 Strict Schema)"]
+    VAL["6-Stage Semantic Validator\n(Hallucination & Anomaly Blocker)"]
+    GUARD["Code Hard-Gate\nAI Cannot Override Legal Firmness"]
+
+    PIT["Point-in-Time Fundamental Linker\n(Historical Financial Statement Master)"]
+    MAT["Order Materiality Ratio Engine\nOrder Value / TTM Revenue >= 15%"]
+    GATES{"8 Portfolio Risk Gates"}
+    REJ["Audit Trail Rejection\n(ASM/GSM, Narrow Band, Blacklist)"]
+
+    LEDGER[("SQLite Relational Ledger\nWAL Mode, 23 Schema-Versioned Tables")]
+    API["FastAPI REST Service\n/events, /sources/health, /reports"]
+    UI["Streamlit Compliance Console\nSide-by-Side PDF Evidence Verification"]
+
+    S1 & S2 & S3 & S4 --> ARCH --> TXT
+    TXT --> ENT --> GRAPH --> TAXO --> FIRM
+    FIRM --> LLM --> VAL -.->|Hard-Gate| GUARD
+    VAL --> PIT --> MAT --> GATES
+    GATES -->|Rejected| REJ
+    GATES -->|Passed All Controls| LEDGER
+    LEDGER --> API
+    LEDGER --> UI
+
+    subgraph INGESTION ["Stage 1 — Data Intake & Archival"]
+        S1
+        S2
+        S3
+        S4
+        ARCH
+        TXT
     end
 
     subgraph RESOLUTION ["Stage 2 — Entity Resolution & Contractual Firmness"]
-        direction TB
-        ENT["Master Entity Resolver\n(ISIN, Ticker, Normalized Aliases)"]
-        GRAPH["Group Structure Graph\n(Parent-Subsidiary Beneficiary Mapping)"]
-        TAXO["28-Archetype Event Taxonomy\n(Orders, Ratings, M&A, Governance)"]
-        FIRM["Deterministic Firmness Engine\n(F0 Rumor to F5 Binding Execution)"]
-
-        ENT --> GRAPH --> TAXO --> FIRM
+        ENT
+        GRAPH
+        TAXO
+        FIRM
     end
 
     subgraph EXTRACTION ["Stage 3 — Agentic AI Extraction"]
-        direction TB
-        LLM["Agentic LLM Extraction\n(Pydantic v2 Strict Schema Enforcement)"]
-        VAL["6-Stage Semantic Validator\n(Hallucination & Currency Anomaly Blocker)"]
-        GUARD["Code Hard-Gate\nAI Cannot Override Legal Firmness"]
-
-        LLM --> VAL -.-> GUARD
+        LLM
+        VAL
+        GUARD
     end
 
     subgraph QUANT ["Stage 4 — Point-in-Time Fundamentals & Risk Controls"]
-        direction TB
-        PIT["Point-in-Time Fundamental Linker\n(Historical Financial Statement Master)"]
-        MAT["Order Materiality Ratio Engine\nOrder Value / TTM Revenue >= 15%"]
-        GATES{"8 Portfolio Risk Gates"}
-        PASS["Event Passes All Controls"]
-        REJ["Audit Trail Rejection\n(ASM/GSM, Narrow Band, Blacklist)"]
-
-        PIT --> MAT --> GATES
-        GATES --> PASS
-        GATES --> REJ
+        PIT
+        MAT
+        GATES
+        REJ
     end
 
     subgraph PERSISTENCE ["Stage 5 — Relational Ledger & Delivery"]
-        direction TB
-        LEDGER[("SQLite Relational Ledger\n(WAL Mode, 23 Schema-Versioned Tables)")]
-        API["FastAPI REST Service\n(/events, /sources/health, /reports)"]
-        UI["Streamlit Compliance Console\n(Side-by-Side PDF Evidence Verification)"]
-
-        LEDGER --> API
-        LEDGER --> UI
+        LEDGER
+        API
+        UI
     end
 
-    TXT --> ENT
-    FIRM --> LLM
-    VAL --> PIT
-    PASS --> LEDGER
-
-    style INGESTION    fill:#f0f4ff,stroke:#3b82f6,stroke-width:2px
-    style RESOLUTION   fill:#f5f0ff,stroke:#8b5cf6,stroke-width:2px
-    style EXTRACTION   fill:#f0fff4,stroke:#10b981,stroke-width:2px
-    style QUANT        fill:#fffbf0,stroke:#f59e0b,stroke-width:2px
-    style PERSISTENCE  fill:#f0fbff,stroke:#06b6d4,stroke-width:2px
+    style INGESTION   fill:none,stroke:#3b82f6,stroke-width:2px
+    style RESOLUTION  fill:none,stroke:#8b5cf6,stroke-width:2px
+    style EXTRACTION  fill:none,stroke:#10b981,stroke-width:2px
+    style QUANT       fill:none,stroke:#f59e0b,stroke-width:2px
+    style PERSISTENCE fill:none,stroke:#06b6d4,stroke-width:2px
 ```
 
 ---
@@ -105,7 +115,7 @@ event-driven-catalyst-engine/
 |   |
 |   +-- ingestion/                      Document Intake, Archiving & Content Hashing
 |   |   +-- archive.py                  SHA-256 cryptographic storage and directory tree partitioning
-|   |   +-- provenance.py              Audit records: source timestamps, HTTP status, parser version
+|   |   +-- provenance.py               Audit records: source timestamps, HTTP status, parser version
 |   |   +-- quality.py                  Text extraction quality assessment and OCR fallback routing
 |   |
 |   +-- identity/                       Master Entity Resolution & Corporate Structures
@@ -117,47 +127,47 @@ event-driven-catalyst-engine/
 |   |   +-- taxonomy.py                 28 canonical archetypes: Credit, Orders, USFDA, Capex
 |   |   +-- firmness.py                 Deterministic F0-F5 contractual firmness scoring matrix
 |   |   +-- dedup.py                    Document SHA-256 and semantic content deduplication engine
-|   |   +-- revisions.py               Event update chains and disclosure amendment tracking
+|   |   +-- revisions.py                Event update chains and disclosure amendment tracking
 |   |
 |   +-- intelligence/                   Agentic AI & Extraction Infrastructure
-|   |   +-- extraction.py              Structured LLM extraction into validated Pydantic models
-|   |   +-- validator.py               6-stage semantic rejection rules (anti-hallucination guard)
-|   |   +-- prompts.py                 Versioned prompt contracts and system instruction templates
-|   |   +-- model_registry.py          Model call caching and idempotency key enforcement
+|   |   +-- extraction.py               Structured LLM extraction into validated Pydantic models
+|   |   +-- validator.py                6-stage semantic rejection rules (anti-hallucination guard)
+|   |   +-- prompts.py                  Versioned prompt contracts and system instruction templates
+|   |   +-- model_registry.py           Model call caching and idempotency key enforcement
 |   |
 |   +-- market/                         Capital Market & Security Master
-|   |   +-- universe.py                Point-in-time security master, liquidity, surveillance filters
-|   |   +-- fundamentals.py            Point-in-time quarterly financials (Revenue, EBITDA, PAT)
-|   |   +-- calendar.py                Indian market trading sessions and holiday calendars
+|   |   +-- universe.py                 Point-in-time security master, liquidity, surveillance filters
+|   |   +-- fundamentals.py             Point-in-time quarterly financials (Revenue, EBITDA, PAT)
+|   |   +-- calendar.py                 Indian market trading sessions and holiday calendars
 |   |
 |   +-- normalization/                  Quantitative Normalization Algorithms
-|   |   +-- algorithms.py              Materiality ratios, 1-20 rating notch changes, lead-time math
+|   |   +-- algorithms.py               Materiality ratios, 1-20 rating notch changes, lead-time math
 |   |
 |   +-- decisions/                      Portfolio Risk Gating & State Machines
-|   |   +-- risk_gates.py              8 portfolio risk controls (Issuer, Sector, Cluster, Freshness)
-|   |   +-- risk.py                    Point-in-time universe and negative event blacklist gates
-|   |   +-- state_machine.py           18-state deterministic event lifecycle DAG
+|   |   +-- risk_gates.py               8 portfolio risk controls (Issuer, Sector, Cluster, Freshness)
+|   |   +-- risk.py                     Point-in-time universe and negative event blacklist gates
+|   |   +-- state_machine.py            18-state deterministic event lifecycle DAG
 |   |
 |   +-- persistence/                    Database Architecture & Storage Engine
-|   |   +-- database.py                SQLite connection manager: WAL mode and strict foreign keys
-|   |   +-- ddl.py                     23 relational schema table definitions and index specs
-|   |   +-- migrations.py             Idempotent versioned schema migration runner
+|   |   +-- database.py                 SQLite connection manager: WAL mode and strict foreign keys
+|   |   +-- ddl.py                      23 relational schema table definitions and index specs
+|   |   +-- migrations.py              Idempotent versioned schema migration runner
 |   |
 |   +-- api/                            REST API Services
-|   |   +-- app.py                     FastAPI application initialization and lifespan management
-|   |   +-- routes.py                  Endpoints: /health, /sources/health, /events, /reports
+|   |   +-- app.py                      FastAPI application initialization and lifespan management
+|   |   +-- routes.py                   Endpoints: /health, /sources/health, /events, /reports
 |   |
 |   +-- review_ui/                      Compliance Review Console (Streamlit)
-|   |   +-- Home.py                    Executive compliance overview and queue metrics dashboard
-|   |   +-- pages/                     Review queue, event detail inspection, evidence viewer
+|   |   +-- Home.py                     Executive compliance overview and queue metrics dashboard
+|   |   +-- pages/                      Review queue, event detail inspection, evidence viewer
 |   |
 |   +-- cli.py                          Unified Command-Line Interface (qual-engine)
 |
 +-- scripts/                            Operational Runbooks & Release Gates
-|   +-- release_gate.py                8-gate release verification (tests, types, linter, migrations)
-|   +-- secret_scan.py                 Automated credentials and token vulnerability scanner
-|   +-- run_failure_drills.py          Outage simulation drills (source down, DB locked, stale data)
-|   +-- backup_db.py                   Online SQLite backup API with rotational retention
+|   +-- release_gate.py                 8-gate release verification (tests, types, linter, migrations)
+|   +-- secret_scan.py                  Automated credentials and token vulnerability scanner
+|   +-- run_failure_drills.py           Outage simulation drills (source down, DB locked, stale data)
+|   +-- backup_db.py                    Online SQLite backup API with rotational retention
 |
 +-- tests/                              142 Passing Unit, Integration & Replay Tests
 |   +-- unit/                           Algorithmic, taxonomy, firmness, and CLI command tests
@@ -234,10 +244,7 @@ uv run qual-engine process-events
 
 ### 5. Launch API & Review Console
 ```bash
-# FastAPI REST API (docs at http://127.0.0.1:8765/docs)
 uv run uvicorn qual_event_engine.api.app:app --host 127.0.0.1 --port 8765
-
-# Streamlit Compliance Review Console
 uv run streamlit run src/qual_event_engine/review_ui/Home.py
 ```
 
@@ -254,6 +261,4 @@ uv run python scripts/release_gate.py
 **P Ragul**
 - Master of Commerce (M.Com — Accounting & Finance), SRM University
 - Bachelor of Commerce (B.Com — Bank Management), Ramakrishna Mission Vivekananda College
-- Chennai, Tamil Nadu, India
 - LinkedIn: [linkedin.com/in/ragul-accfin](https://www.linkedin.com/in/ragul-accfin)
-- GitHub: [github.com/Hastagtamilnadu](https://github.com/Hastagtamilnadu)
