@@ -1,96 +1,97 @@
-# Event-Driven Corporate Catalyst & Market Microstructure Engine
+# Indian Corporate Disclosure & Catalyst Analysis Pipeline
 
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/framework-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
-[![SQLite WAL](https://img.shields.io/badge/database-SQLite_WAL-orange.svg)](https://www.sqlite.org/)
-[![Pydantic v2](https://img.shields.io/badge/validation-Pydantic_v2-e92063.svg)](https://docs.pydantic.dev/)
-[![Tests Passing](https://img.shields.io/badge/tests-142%20passed-brightgreen.svg)]()
+[![SQLite](https://img.shields.io/badge/database-SQLite-orange.svg)](https://www.sqlite.org/)
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An institutional-grade, event-driven financial data ingestion, entity resolution, and quantitative disclosure processing pipeline engineered for **2,300+ Indian corporate issuers (NSE/BSE)**.
+A financial data analysis and corporate disclosure screening pipeline built for **Indian listed equities (NSE/BSE)**.
 
-The engine ingests official exchange announcements, credit rating agency releases, USFDA inspection outcomes, and environmental regulatory clearances. It converts unstructured corporate filings into structured, audit-trailed financial metrics for institutional risk assessment and quantitative research, using responsible agentic AI workflows, Pydantic v2 schemas, and point-in-time fundamental validation.
+The project automates the collection and financial screening of corporate exchange announcements, credit rating agency releases (CRISIL, ICRA, CARE, India Ratings), USFDA inspection notices, and environmental clearances. Rather than treating every corporate headline as equal, the pipeline applies **accounting materiality thresholds, contractual enforceability grading (F0–F5), credit rating scale normalization, and SEBI surveillance filters** to separate material financial catalysts from routine corporate noise.
 
 ---
 
-## Architecture & Pipeline Flow
+## Project Scope & Development Methodology
+
+This project was built from an **Accounting & Financial Data Analysis** perspective, combining domain-driven financial research with AI-assisted Python development:
+
+* **Financial Logic & Analytical Framework (Author-Designed):**
+  * **Contractual Firmness Grading (F0–F5):** Designed the classification rules separating non-binding MoUs (`F1`) and provisional Lowest Bidder (`L1` / `F3`) announcements from signed Letters of Award (`F4`) and executed contracts (`F5`).
+  * **Accounting Materiality Screening:** Defined the `Order Value / TTM Operating Revenue >= 15%` threshold (with a Rs. 50 Crore floor) to measure the actual financial impact of new order wins against historical quarterly income statements.
+  * **Credit Rating Scale Mapping:** Constructed the 1-to-20 numerical conversion table (`D = 1` to `AAA = 20`) to standardize rating upgrades and downgrades across CRISIL, ICRA, CARE, and India Ratings.
+  * **Market Microstructure & Surveillance Filters:** Specified screening rules for SEBI surveillance lists (`ASM`, `GSM`, `ESM`), narrow price circuit bands (`<= 5%`), and adverse governance events (auditor resignations, forensic audits).
+* **Software Scaffolding & Automation (AI-Assisted):**
+  * Used AI coding tools to translate these financial rules into a modular Python package, including the SQLite database schema, LLM text-extraction prompts, FastAPI/Streamlit viewer interfaces, and automated test cases.
+
+---
+
+## Analytical Pipeline Flow
 
 ```mermaid
 flowchart LR
-    S1["NSE / BSE Corporate Filings\n(Live HTTPS API Polling)"]
+    S1["NSE / BSE Exchange Filings\n(Corporate Announcements)"]
     S2["Credit Rating Releases\n(CRISIL, ICRA, CARE, India Ratings)"]
-    S3["USFDA Regulatory Filings\n(Form 483 / EIR Clearances)"]
-    S4["Parivesh Environmental Approvals\n(Capex & Industrial Clearances)"]
-    ARCH["Document Archiver\n(SHA-256 Cryptographic Checksum)"]
-    TXT["Text Extraction Pipeline\n(PyMuPDF + OCR Routing)"]
+    S3["Regulatory Filings\n(USFDA & Environmental Clearances)"]
+    PARSE["PDF Text Extraction\n& Filing Archive"]
 
-    ENT["Master Entity Resolver\n(ISIN, Ticker, Normalized Aliases)"]
-    GRAPH["Group Structure Graph\n(Parent-Subsidiary Mapping)"]
-    TAXO["28-Archetype Event Taxonomy\n(Orders, Ratings, M&A, Governance)"]
-    FIRM["Deterministic Firmness Engine\n(F0 Rumor to F5 Binding Execution)"]
+    RESOLV["Company Entity Matching\n(ISIN, NSE Ticker & Subsidiary Lookup)"]
+    CAT["Event Categorization\n(Orders, Ratings, Capex, Governance)"]
+    FIRM["Contractual Firmness Check\n(F0 Rumor to F5 Signed Contract)"]
 
-    LLM["Agentic LLM Extraction\n(Pydantic v2 Strict Schema)"]
-    VAL["6-Stage Semantic Validator\n(Hallucination & Anomaly Blocker)"]
-    GUARD["Code Hard-Gate\nAI Cannot Override Legal Firmness"]
+    EXTRACT["Structured Data Extraction\n(Order Value, Counterparty, Rating Change)"]
+    CHECK["Rule Validation\n(Verify Numbers & Currency Units)"]
 
-    PIT["Point-in-Time Fundamental Linker\n(Historical Financial Statement Master)"]
-    MAT["Order Materiality Ratio Engine\nOrder Value / TTM Revenue >= 15%"]
-    GATES{"8 Portfolio Risk Gates"}
-    REJ["Audit Trail Rejection\n(ASM/GSM, Narrow Band, Blacklist)"]
+    FIN["Quarterly Financials Lookup\n(Trailing 12-Month Revenue & PAT)"]
+    MAT["Materiality Ratio Calculation\nOrder Value / TTM Revenue >= 15%"]
+    RISK{"Surveillance & Risk Screen"}
+    REJ["Filtered Out\n(Routine Order < 15% TTM or ASM/GSM Stock)"]
 
-    LEDGER[("SQLite Relational Ledger\nWAL Mode, 23 Schema-Versioned Tables")]
-    API["FastAPI REST Service\n/events, /sources/health, /reports"]
-    UI["Streamlit Compliance Console\nSide-by-Side PDF Evidence Verification"]
+    DB[("SQLite Analysis Database\n(Structured Events & Ratios)")]
+    OUT["Analytical Output\n(CSV Exports & Review Dashboard)"]
 
-    S1 & S2 & S3 & S4 --> ARCH --> TXT
-    TXT --> ENT --> GRAPH --> TAXO --> FIRM
-    FIRM --> LLM --> VAL -.->|Hard-Gate| GUARD
-    VAL --> PIT --> MAT --> GATES
-    GATES -->|Rejected| REJ
-    GATES -->|Passed All Controls| LEDGER
-    LEDGER --> API
-    LEDGER --> UI
+    S1 & S2 & S3 --> PARSE
+    PARSE --> RESOLV --> CAT --> FIRM
+    FIRM --> EXTRACT --> CHECK
+    CHECK --> FIN --> MAT --> RISK
+    RISK -->|"Fails Criteria"| REJ
+    RISK -->|"Passes Materiality & Risk"| DB
+    DB --> OUT
 
-    subgraph INGESTION ["Stage 1 — Data Intake & Archival"]
+    subgraph STAGE1 ["1. Filing Collection"]
         S1
         S2
         S3
-        S4
-        ARCH
-        TXT
+        PARSE
     end
 
-    subgraph RESOLUTION ["Stage 2 — Entity Resolution & Contractual Firmness"]
-        ENT
-        GRAPH
-        TAXO
+    subgraph STAGE2 ["2. Company & Event Classification"]
+        RESOLV
+        CAT
         FIRM
     end
 
-    subgraph EXTRACTION ["Stage 3 — Agentic AI Extraction"]
-        LLM
-        VAL
-        GUARD
+    subgraph STAGE3 ["3. Financial Figure Extraction"]
+        EXTRACT
+        CHECK
     end
 
-    subgraph QUANT ["Stage 4 — Point-in-Time Fundamentals & Risk Controls"]
-        PIT
+    subgraph STAGE4 ["4. Materiality & Surveillance Screening"]
+        FIN
         MAT
-        GATES
+        RISK
         REJ
     end
 
-    subgraph PERSISTENCE ["Stage 5 — Relational Ledger & Delivery"]
-        LEDGER
-        API
-        UI
+    subgraph STAGE5 ["5. Database & Reporting"]
+        DB
+        OUT
     end
 
-    style INGESTION   fill:none,stroke:#3b82f6,stroke-width:2px
-    style RESOLUTION  fill:none,stroke:#8b5cf6,stroke-width:2px
-    style EXTRACTION  fill:none,stroke:#10b981,stroke-width:2px
-    style QUANT       fill:none,stroke:#f59e0b,stroke-width:2px
-    style PERSISTENCE fill:none,stroke:#06b6d4,stroke-width:2px
+    style STAGE1 fill:none,stroke:#3b82f6,stroke-width:2px
+    style STAGE2 fill:none,stroke:#8b5cf6,stroke-width:2px
+    style STAGE3 fill:none,stroke:#10b981,stroke-width:2px
+    style STAGE4 fill:none,stroke:#f59e0b,stroke-width:2px
+    style STAGE5 fill:none,stroke:#06b6d4,stroke-width:2px
 ```
 
 ---
@@ -100,158 +101,126 @@ flowchart LR
 ```
 event-driven-catalyst-engine/
 |
-+-- configs/                            System & Regulatory Configuration
-|   +-- sources.yaml                    9 data source specs: poll schedules, timeouts, retry limits
-|   +-- universe.yaml                   4-tier market-cap and liquidity universe eligibility rules
-|   +-- costs.yaml                      Indian statutory fee schedule (STT, GST, SEBI, exchange fees)
-|   +-- strategies.yaml                 Quantitative catalyst parameters and human review thresholds
++-- configs/                            Financial Thresholds & Screening Rules
+|   +-- sources.yaml                    Filing source configurations and polling intervals
+|   +-- universe.yaml                   Market-cap and daily liquidity eligibility rules
+|   +-- costs.yaml                      Indian statutory transaction fee schedule (STT, GST, SEBI)
+|   +-- strategies.yaml                 Materiality ratio cutoffs and firmness thresholds
 |
-+-- src/qual_event_engine/              Core Production Package
++-- src/qual_event_engine/              Core Python Package
 |   |
-|   +-- sources/                        Autonomous Ingestion Adapters (S1-S9)
-|   |   +-- exchange.py                 NSE live API polling, exponential backoff, PDF downloader
-|   |   +-- base.py                     Abstract base adapter: TLS enforcement and cursor checkpoints
-|   |   +-- registry.py                 Connector and adapter factory registry
+|   +-- identity/                       Company & Subsidiary Lookup
+|   |   +-- resolver.py                 Matches filings to NSE tickers and ISIN identifiers
+|   |   +-- aliases.py                  Cleans corporate suffixes (Ltd, Pvt Ltd, India)
+|   |   +-- relationships.py            Maps unlisted subsidiary/SPV orders to listed parent companies
 |   |
-|   +-- ingestion/                      Document Intake, Archiving & Content Hashing
-|   |   +-- archive.py                  SHA-256 cryptographic storage and directory tree partitioning
-|   |   +-- provenance.py               Audit records: source timestamps, HTTP status, parser version
-|   |   +-- quality.py                  Text extraction quality assessment and OCR fallback routing
+|   +-- events/                         Event Classification & Firmness Rules
+|   |   +-- taxonomy.py                 Categorizes filings (Order Wins, Credit Ratings, USFDA, Capex)
+|   |   +-- firmness.py                 Applies F0-F5 legal enforceability scoring rules
+|   |   +-- dedup.py                    Removes duplicate exchange announcements
 |   |
-|   +-- identity/                       Master Entity Resolution & Corporate Structures
-|   |   +-- resolver.py                 Multi-tier matching: ISIN, ticker symbol, fuzzy corporate name
-|   |   +-- aliases.py                  Legal suffix normalization (Ltd, PLC, Corp) and alias maps
-|   |   +-- relationships.py            Parent-subsidiary and joint venture beneficiary graphs
+|   +-- normalization/                  Financial Ratio & Rating Calculations
+|   |   +-- algorithms.py               Order Materiality (Order/TTM Revenue) & 1-20 rating scale math
 |   |
-|   +-- events/                         Event Taxonomy & Legal Enforceability
-|   |   +-- taxonomy.py                 28 canonical archetypes: Credit, Orders, USFDA, Capex
-|   |   +-- firmness.py                 Deterministic F0-F5 contractual firmness scoring matrix
-|   |   +-- dedup.py                    Document SHA-256 and semantic content deduplication engine
-|   |   +-- revisions.py                Event update chains and disclosure amendment tracking
+|   +-- market/                         Financial Statement & Universe Data
+|   |   +-- fundamentals.py             Links announcements to historical quarterly revenue and PAT
+|   |   +-- universe.py                 Checks daily traded turnover and SEBI ASM/GSM surveillance flags
+|   |   +-- calendar.py                 NSE trading session and holiday calendar lookup
 |   |
-|   +-- intelligence/                   Agentic AI & Extraction Infrastructure
-|   |   +-- extraction.py               Structured LLM extraction into validated Pydantic models
-|   |   +-- validator.py                6-stage semantic rejection rules (anti-hallucination guard)
-|   |   +-- prompts.py                  Versioned prompt contracts and system instruction templates
-|   |   +-- model_registry.py           Model call caching and idempotency key enforcement
+|   +-- intelligence/                   LLM Text Extraction Helpers
+|   |   +-- extraction.py               Extracts contract values and rating changes from PDF text
+|   |   +-- validator.py                Checks extracted numbers against source text and unit scales
 |   |
-|   +-- market/                         Capital Market & Security Master
-|   |   +-- universe.py                 Point-in-time security master, liquidity, surveillance filters
-|   |   +-- fundamentals.py             Point-in-time quarterly financials (Revenue, EBITDA, PAT)
-|   |   +-- calendar.py                 Indian market trading sessions and holiday calendars
+|   +-- decisions/                      Screening & Portfolio Filter Logic
+|   |   +-- risk_gates.py               Applies liquidity, sector exposure, and governance filters
+|   |   +-- risk.py                     Flags adverse corporate events (auditor resignations, defaults)
 |   |
-|   +-- normalization/                  Quantitative Normalization Algorithms
-|   |   +-- algorithms.py               Materiality ratios, 1-20 rating notch changes, lead-time math
+|   +-- sources/                        Exchange & Regulatory Downloaders
+|   |   +-- exchange.py                 Downloads daily corporate announcements from NSE
 |   |
-|   +-- decisions/                      Portfolio Risk Gating & State Machines
-|   |   +-- risk_gates.py               8 portfolio risk controls (Issuer, Sector, Cluster, Freshness)
-|   |   +-- risk.py                     Point-in-time universe and negative event blacklist gates
-|   |   +-- state_machine.py            18-state deterministic event lifecycle DAG
+|   +-- persistence/                    SQLite Storage Layer
+|   |   +-- database.py                 SQLite database connection and query helpers
+|   |   +-- ddl.py                      Table schemas for filings, company financials, and events
 |   |
-|   +-- persistence/                    Database Architecture & Storage Engine
-|   |   +-- database.py                 SQLite connection manager: WAL mode and strict foreign keys
-|   |   +-- ddl.py                      23 relational schema table definitions and index specs
-|   |   +-- migrations.py              Idempotent versioned schema migration runner
+|   +-- review_ui/                      Streamlit Inspection Interface
+|   |   +-- Home.py                     Dashboard to review extracted figures alongside source PDFs
 |   |
-|   +-- api/                            REST API Services
-|   |   +-- app.py                      FastAPI application initialization and lifespan management
-|   |   +-- routes.py                   Endpoints: /health, /sources/health, /events, /reports
-|   |
-|   +-- review_ui/                      Compliance Review Console (Streamlit)
-|   |   +-- Home.py                     Executive compliance overview and queue metrics dashboard
-|   |   +-- pages/                      Review queue, event detail inspection, evidence viewer
-|   |
-|   +-- cli.py                          Unified Command-Line Interface (qual-engine)
+|   +-- cli.py                          Command-Line Runner (qual-engine)
 |
-+-- scripts/                            Operational Runbooks & Release Gates
-|   +-- release_gate.py                 8-gate release verification (tests, types, linter, migrations)
-|   +-- secret_scan.py                  Automated credentials and token vulnerability scanner
-|   +-- run_failure_drills.py           Outage simulation drills (source down, DB locked, stale data)
-|   +-- backup_db.py                    Online SQLite backup API with rotational retention
++-- tests/                              Automated Verification Tests
+|   +-- unit/                           Tests for materiality math, rating notch calculation, and F0-F5 rules
+|   +-- integration/                    End-to-end filing processing tests
+|   +-- fixtures/                       Sample corporate disclosures and financial test cases
 |
-+-- tests/                              142 Passing Unit, Integration & Replay Tests
-|   +-- unit/                           Algorithmic, taxonomy, firmness, and CLI command tests
-|   +-- integration/                    Pipeline end-to-end, migration, and source ingestion tests
-|   +-- replay/                         Zero-lookahead temporal replay and simulator tests
-|   +-- fixtures/                       Benchmark disclosures, mock filings, and ground-truth data
-|
-+-- pyproject.toml                      Python dependencies and tooling (Hatchling, Ruff, Mypy)
-+-- LICENSE                             MIT Open Source License
-+-- README.md                           This file
++-- pyproject.toml                      Python dependencies and package setup
++-- LICENSE                             MIT License
++-- README.md                           Project documentation
 ```
 
 ---
 
-## Key Financial & Data Engineering Capabilities
+## Core Financial Analysis Logic
 
-### 1. Master Entity Resolution & Subsidiary Mapping
-- Resolves noisy disclosures across **2,300+ Indian corporate entities** via multi-tier waterfall: exact ISIN indexing → ticker mapping → normalized legal name matching → fuzzy Levenshtein distance.
-- Solves the core capital market edge case where contracts are awarded to unlisted project SPVs or subsidiaries, traversing group relationship graphs to identify the true listed beneficiary.
+### 1. Contractual Firmness Grading (F0–F5)
+Corporate announcements in India frequently mix non-binding intentions with signed revenue contracts. To avoid acting on premature disclosures, every order/contract filing is graded on a 6-level scale:
 
-### 2. Contractual Firmness Grading (F0–F5)
-Applies a deterministic legal enforceability grading system, hard-coded to prevent AI promotion:
+| Grade | Classification | Financial & Legal Meaning |
+|-------|---------------|---------------------------|
+| **F0** | Rumor / Media | Unconfirmed press reports without exchange confirmation |
+| **F1** | Intention / MoU | Non-binding Memorandum of Understanding or management guidance |
+| **F2** | Pre-Qualification | Technically qualified for tender bidding; no commercial win |
+| **F3** | Lowest Bidder (L1) | Declared L1 bidder in a tender, but formal Letter of Award is still pending |
+| **F4** | Binding Award (LOA) | Official Letter of Award received or board-approved transaction |
+| **F5** | Signed Contract | Definitive commercial agreement executed or final regulatory clearance |
 
-| Grade | Label | Evidence Standard |
-|-------|-------|------------------|
-| F0 | Rumor | Media speculation or unconfirmed anonymous reports |
-| F1 | Intention | Non-binding MoUs and management commentary |
-| F2 | Pre-Award | Technical qualification stage |
-| F3 | Lowest Bidder | Official L1 tender declaration (no LOA yet) |
-| F4 | Binding Award | Formal Letter of Award or board-approved scheme |
-| F5 | Execution Evidence | Signed commercial contract or final regulatory approval |
+*Rule Enforcement:* An AI extraction step cannot upgrade a filing's firmness grade unless the deterministic legal keywords (such as "Letter of Award" or "Work Order") are present in the filing text.
 
-LLM extraction models are strictly prevented by code from promoting firmness scores above deterministic legal tokens.
+### 2. Order Book Materiality Ratio
+A Rs. 100 Crore order is transformative for a small-cap engineering firm with Rs. 300 Crore in annual sales, but immaterial for a large-cap conglomerate. Each order win is compared against the company's **Trailing 12-Month (TTM) Operating Revenue** as of the announcement date:
 
-### 3. Credit Rating Notch Calculation
-- Converts rating agency alphanumeric scales (CRISIL, ICRA, CARE, India Ratings) into a canonical **1–20 ordinal scale** (D=1 to AAA=20).
-- Calculates exact notch movements (e.g., CRISIL AA to CRISIL AA+ = +1.0 notch), standardizing rating actions across all four major Indian agencies.
+$$\text{Order Materiality Ratio} = \frac{\text{Awarded Order Value (INR)}}{\text{TTM Operating Revenue (INR)}}$$
 
-### 4. Point-in-Time Materiality Screening
-- Connects disclosures to the company's historical quarterly financials active on the announcement date (no look-ahead contamination).
-- Evaluates economic significance via the **Order Materiality Ratio**: `Contract Value (INR) / TTM Operating Revenue (INR)`.
-- Discards routine contract awards below 15% of TTM revenue or below Rs. 50 Crore absolute size.
+- **Materiality Cutoff:** Orders below **15% of TTM revenue** (or below **Rs. 50 Crore** absolute value) are filtered out as routine business operations.
+- **Point-in-Time Matching:** Uses the quarterly financial results already published prior to the filing date to avoid look-ahead bias in historical analysis.
 
-### 5. Regulatory Surveillance & Microstructure Screening
-- Screens out securities placed under SEBI/NSE surveillance measures (ASM, GSM, ESM, T2T).
-- Rejects securities with tight circuit bands (≤2% or ≤5%) to eliminate illiquidity and exit execution risks.
-- Triggers automatic liquidation and a 20-session trading freeze upon adverse governance events (forensic audits, auditor resignations, SEBI inquiries).
+### 3. Credit Rating Standardization (1–20 Scale)
+Indian credit rating agencies (CRISIL, ICRA, CARE, India Ratings) publish ratings using alphanumeric symbols (`BBB-`, `A+`, `AA`, etc.). The pipeline maps these symbols onto a uniform **1 to 20 ordinal scale** (`D = 1` up to `AAA = 20`) to compute exact notch changes:
+- Example: An upgrade from `CRISIL A` (14) to `CRISIL A+` (15) is recorded as a `+1.0 notch` improvement, enabling quantitative comparison across agencies and sectors.
+
+### 4. Subsidiary & SPV Beneficiary Mapping
+Infrastructure and capital goods companies often win contracts through unlisted Special Purpose Vehicles (SPVs) or wholly-owned subsidiaries. The entity lookup module maps subsidiary names back to the listed NSE parent company so that material subsidiary orders are properly attributed to the parent's consolidated revenue base.
+
+### 5. SEBI Surveillance & Microstructure Filters
+Even when a corporate catalyst is financially material, market microstructure constraints can make a stock uninvestable. The screening logic excludes:
+- Securities under SEBI **ASM (Additional Surveillance Measure)**, **GSM (Graded Surveillance Measure)**, or **ESM**.
+- Securities restricted to narrow daily price circuit bands (**2% or 5%**), where liquidity dries up during price moves.
+- Companies with recent adverse governance filings (auditor resignations, forensic audits, or debt defaults).
 
 ---
 
 ## Quick Start
 
-### 1. Installation
+### 1. Setup Environment
 ```bash
 git clone https://github.com/Hastagtamilnadu/event-driven-catalyst-engine.git
 cd event-driven-catalyst-engine
 uv sync --extra dev
 ```
 
-### 2. Initialize Database
+### 2. Initialize SQLite Database
 ```bash
 uv run qual-engine initialise-db
 ```
 
-### 3. Ingest Live Exchange Announcements
+### 3. Run Filing Ingestion & Screening
 ```bash
 uv run qual-engine ingest --source exchange --mode LIVE_POLL
-```
-
-### 4. Process Events & Run AI Extraction
-```bash
 uv run qual-engine process-events
 ```
 
-### 5. Launch API & Review Console
+### 4. Run Tests
 ```bash
-uv run uvicorn qual_event_engine.api.app:app --host 127.0.0.1 --port 8765
-uv run streamlit run src/qual_event_engine/review_ui/Home.py
-```
-
-### 6. Run Tests & Release Gates
-```bash
-uv run pytest tests/unit tests/integration tests/replay
-uv run python scripts/release_gate.py
+uv run pytest tests/unit tests/integration
 ```
 
 ---
